@@ -128,31 +128,31 @@ class Regression(object):
         
         if self.linear_regression:             
             
-            w = self.initialize_weights((self.X_dat.shape[1]), self.X_dat.shape[1], 1, self.weights_initialization)            # initialize weights for the parameters ( linear regression )
+            self.w = self.initialize_weights((self.X_dat.shape[1]), self.X_dat.shape[1], 1, self.weights_initialization)            # initialize weights for the parameters ( linear regression )
             
             if self.add_bias:
                 
-                b = theano.shared(np.asarray(0, dtype=theano.config.floatX))                                                       # initialize bias to zero ( linear regression -- a single value )
+                self.b = theano.shared(np.asarray(0, dtype=theano.config.floatX))                                                       # initialize bias to zero ( linear regression -- a single value )
             
-                py_x = T.dot(X, w) + b                                                                                             # get predictions for linear regression
+                py_x = T.dot(X, self.w) + self.b                                                                                             # get predictions for linear regression
             
             else:
                 
-                py_x = T.dot(X, w)
+                py_x = T.dot(X, self.w)
             
         else:
             
-            w = self.initialize_weights((self.X_dat.shape[1], self.y_dat.shape[1]), self.X_dat.shape[1], self.y_dat.shape[1], self.weights_initialization)       # initialize weights for the parameters ( logistic regression )
+            self.w = self.initialize_weights((self.X_dat.shape[1], self.y_dat.shape[1]), self.X_dat.shape[1], self.y_dat.shape[1], self.weights_initialization)       # initialize weights for the parameters ( logistic regression )
             
             if self.add_bias:
                 
-                b = theano.shared(np.zeros((self.y_dat.shape[1],), dtype=theano.config.floatX))                                    # initialize bias to zeros ( logistic regression -- a numpy array )
+                self.b = theano.shared(np.zeros((self.y_dat.shape[1],), dtype=theano.config.floatX))                                    # initialize bias to zeros ( logistic regression -- a numpy array )
                 
-                py_x = T.nnet.softmax(T.dot(X, w) + b)                                                                                         # get probability predictions
+                py_x = T.nnet.softmax(T.dot(X, self.w) + self.b)                                                                                         # get probability predictions
                 
             else:
                 
-                py_x = T.nnet.softmax(T.dot(X, w))
+                py_x = T.nnet.softmax(T.dot(X, self.w))
         
         
         cost = T.mean(self.objectives(py_x, Y, self.objective, self.X_dat.shape[0]))                                                    # objective function
@@ -162,27 +162,27 @@ class Regression(object):
         
             if self.add_bias:
                 
-                reg_param_L1  = abs(T.sum(w) + T.sum(b))                               # L1 regrularization
+                reg_param_L1  = abs(T.sum(self.w) + T.sum(self.b))                               # L1 regrularization
                 
-                reg_param_L2 = T.sum(T.sqr(w)) + T.sum(T.sqr(b))                       # L2 regularization
+                reg_param_L2 = T.sum(T.sqr(self.w)) + T.sum(T.sqr(self.b))                       # L2 regularization
     
                 cost = cost + self.L1 * reg_param_L1 + self.L2 * reg_param_L2
                 
             else:
                 
-                reg_param_L1  = abs(T.sum(w))                                         # L1 regrularization
+                reg_param_L1  = abs(T.sum(self.w))                                         # L1 regrularization
                 
-                reg_param_L2 = T.sum(T.sqr(w))                                        # L2 regularization
+                reg_param_L2 = T.sum(T.sqr(self.w))                                        # L2 regularization
     
                 cost = cost + self.L1 * reg_param_L1 + self.L2 * reg_param_L2
         
         if self.add_bias:
             
-            Params = [w, b]
+            Params = [self.w, self.b]
             
         else:
             
-            Params = [w]
+            Params = [self.w]
         
        
         if self.batch_size is None:
@@ -193,7 +193,7 @@ class Regression(object):
 
                                     givens = { X: train_X[0:index], Y: train_y[0:index] }, allow_input_downcast = True)         # Compile [ call external class Optimizers_update ]
 
-            predict_valid = theano.function(inputs = [index], outputs = py_x, givens = { X: test_X[0:index]}, allow_input_downcast = True)           
+            predict_valid = theano.function(inputs = [index], outputs = py_x, givens = { X: test_X[0:index]}, allow_input_downcast = True)
            
         else:
             
@@ -301,4 +301,19 @@ class Regression(object):
         
         return preds
         
+        
+        
+    def WeightsBias(self):
+        
+        if self.add_bias:
+            
+            weights, bias = self.w.get_value(), self.b.get_value()
+            
+            return weights, bias
+            
+        else:
+            
+             weights = self.w.get_value()
+             
+             return weights
 
