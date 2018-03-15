@@ -1,5 +1,5 @@
 
-[![codebeat badge](https://codebeat.co/badges/28576339-5daa-479e-b0a0-90a72adf3dc4)](https://codebeat.co/projects/github-com-mlampros-regression_theano-master)
+<a href="https://codebeat.co/projects/github-com-mlampros-regression_theano-master"><img alt="codebeat badge" src="https://codebeat.co/badges/28576339-5daa-479e-b0a0-90a72adf3dc4" /></a>
 
 **Linear and logistic regression in Theano**
 
